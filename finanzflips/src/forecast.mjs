@@ -235,34 +235,11 @@ export function accountForecast(
       }
     }
   }
-  const knownIds = new Set(
-    [...relevant, ...transfers].flatMap((r) => r.evidenceIds || []),
-  );
-  const recent = txs.filter(
-    (t) =>
-      t.accountId === account.id &&
-      t.amount < 0 &&
-      !isTransfer(t, state) &&
-      !knownIds.has(t.id) &&
-      daysBetween(asOf, t.bookingDate) >= 0 &&
-      daysBetween(asOf, t.bookingDate) < 90,
-  );
-  const span = Math.min(
-    90,
-    Math.max(
-      1,
-      ...txs
-        .filter((t) => t.accountId === account.id && t.bookingDate <= asOf)
-        .map((t) => daysBetween(asOf, t.bookingDate) + 1),
-    ),
-  );
-  const daily =
-    state.settings?.forecastVariableDaily == null
-      ? Math.round((Math.abs(sum(recent.map((t) => t.amount))) / span) * 100) /
-        100
-      : Number(state.settings.forecastVariableDaily) || 0;
-  const variable =
-    Math.round(daily * Math.max(0, daysBetween(target, asOf)) * 100) / 100;
+  // This forecast intentionally contains no inferred discretionary spending.
+  // Only the booked balance and dated recurring movements are allowed to
+  // affect the value shown for the next 10th.
+  const daily = 0,
+    variable = 0;
   const income = sum(events.filter((x) => x.amount > 0).map((x) => x.amount)),
     expenses = Math.abs(
       sum(events.filter((x) => x.amount < 0).map((x) => x.amount)),
