@@ -68,4 +68,14 @@ if(!/^[a-f0-9]{32}$/.test(options.owner_id||''))throw Error('Bitte die Home-Assi
 process.env.FINANZFLIPS_HA_OWNER_ID=options.owner_id;
 process.env.FINANZFLIPS_NOTIFY_SERVICE=options.notify_service||'';
 try{const r=await fetch('http://supervisor/addons/self/info',{headers:{Authorization:'Bearer '+process.env.SUPERVISOR_TOKEN},signal:AbortSignal.timeout(10000)});const {data}=await r.json();if(data?.slug)process.env.FINANZFLIPS_HA_PANEL='/hassio/ingress/'+data.slug;}catch{}
+try {
+  const { localVault } = await import('./local-vault.mjs');
+  const vault = localVault(importRoot);
+  const stored = JSON.parse(vault.read(path.join(importRoot, '.finanzflips-data.json')));
+  console.log(
+    `[storage] app-konten=${stored.appState?.accounts?.length || 0} bank-konten=${stored.accounts?.length || 0} sitzungen=${stored.sessions?.length || 0}`,
+  );
+} catch (error) {
+  console.error(`[storage] nicht lesbar: ${error.name}`);
+}
 await import('./server.mjs');
