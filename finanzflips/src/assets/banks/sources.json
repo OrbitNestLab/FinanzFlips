@@ -1,0 +1,308 @@
+{
+  "1822direkt.de": {
+    "file": "/assets/banks/1822direkt-de.png",
+    "source": "https://www.1822direkt.de/_assets/2e42feddfab07fbfc020b77ea8456016/Favicon/apple-touch-icon.png",
+    "bytes": 4117
+  },
+  "abnamro.de": {
+    "file": "/assets/banks/abnamro-de.ico",
+    "source": "https://www.abnamro.de/nl/owa/static//favicon.ico",
+    "bytes": 1150
+  },
+  "advanzia.com": {
+    "file": "/assets/banks/advanzia-com.ico",
+    "source": "https://www.advanzia.com/favicon.ico?favicon.0bvqe1rje2q_i.ico",
+    "bytes": 15086
+  },
+  "apobank.de": {
+    "file": "/assets/banks/apobank-de.png",
+    "source": "https://www.apobank.de/.resources/apocore/webresources/assets/favicon/apple-touch-icon-152x152.png",
+    "bytes": 7897
+  },
+  "audibank.de": {
+    "file": "/assets/banks/audibank-de.png",
+    "source": "https://www.audibank.de/etc.clientlibs/bluelabel/clientlibs/clientlib-site-audi/resources/favicon/apple-touch-icon.png?v=042",
+    "bytes": 2014
+  },
+  "bank11.de": {
+    "file": "/assets/banks/bank11-de.png",
+    "source": "https://www.bank11.de/wp-content/uploads/2023/10/cropped-android-chrome-512x512-1-180x180.png",
+    "bytes": 2362
+  },
+  "bayernlb.de": {
+    "file": "/assets/banks/bayernlb-de.png",
+    "source": "https://www.bayernlb.de/internet/media/ir/technik_2/images_6/images_mdg/apple_touch_icon.png",
+    "bytes": 4866
+  },
+  "bbbank.de": {
+    "source": "https://marken-portal.bbbank.de/wp-content/themes/bbbank-theme/resources/assets/images/bbbank_logo_mobile.svg",
+    "file": "/assets/banks/bbbank.svg",
+    "bytes": 1246
+  },
+  "berliner-sparkasse.de": {
+    "file": "/assets/banks/berliner-sparkasse-de.png",
+    "source": "https://www.berliner-sparkasse.de/content/dam/myif/berliner-sk/work/bilder/icons/apple-touch-icon-180x180px.png",
+    "bytes": 1829
+  },
+  "berliner-volksbank.de": {
+    "file": "",
+    "source": "https://www.berliner-volksbank.de",
+    "error": "Kein geeignetes Bild geladen"
+  },
+  "bhw.de": {
+    "file": "/assets/banks/bhw-de.png",
+    "source": "https://www.bhw.de/etc/designs/pb-eccs-bhwde/icons/bhw-favicon-180x180.png",
+    "bytes": 8517
+  },
+  "bmwbank.de": {
+    "file": "/assets/banks/bmwbank-de.png",
+    "source": "https://www.bmwbank.de/favicon.png",
+    "bytes": 972
+  },
+  "comdirect.de": {
+    "file": "/assets/banks/comdirect-de.png",
+    "source": "https://www.google.com/s2/favicons?domain=comdirect.de&sz=128",
+    "bytes": 1436,
+    "note": "Favicon cache for official bank domain"
+  },
+  "commerzbank.de": {
+    "file": "/assets/banks/commerzbank-de.png",
+    "source": "https://www.commerzbank.de/ms/media/favicons/app_icon.png",
+    "bytes": 1680
+  },
+  "consorsbank.de": {
+    "file": "/assets/banks/consorsbank-de.png",
+    "source": "https://www.consorsbank.de/content/dam/de-cb/system/images/modern-web/icons/apple-touch-icon.png",
+    "bytes": 10585
+  },
+  "consorsfinanz.de": {
+    "file": "/assets/banks/consorsfinanz-de.png",
+    "source": "https://www.consorsfinanz.de/assets/apple-icon-57x57.21fcbb04c6f9f3ad6506a05d9622c53a.png",
+    "bytes": 3400
+  },
+  "creditplus.de": {
+    "file": "/assets/banks/creditplus-de.png",
+    "source": "https://www.creditplus.de/apple-icon-57x57.png",
+    "bytes": 2139
+  },
+  "degussa-bank.de": {
+    "file": "",
+    "source": "https://www.degussa-bank.de",
+    "error": "Kein geeignetes Bild geladen"
+  },
+  "deutsche-bank.de": {
+    "file": "/assets/banks/deutsche-bank-de.png",
+    "source": "https://www.deutsche-bank.de/etc/designs/db-eccs-pws-pwcc/assets/db-favicon-180x180.png",
+    "bytes": 10346
+  },
+  "dkb.de": {
+    "file": "/assets/banks/dkb-de.png",
+    "source": "https://www.dkb.de/apple-touch-icon-180x180.png",
+    "bytes": 819
+  },
+  "dslbank.de": {
+    "file": "/assets/banks/dslbank-de.png",
+    "source": "https://www.dslbank.de/etc/designs/pb-eccs-dslb/icons/dslb-favicon-180x180.png",
+    "bytes": 14309
+  },
+  "easybank.de": {
+    "file": "/assets/banks/easybank-de.png",
+    "source": "https://www.easybank.de/resource/crblob/132786/2551c71476bf5aee0a1e3de87de2d80e/favicon-data.png",
+    "bytes": 2943
+  },
+  "fordbank.de": {
+    "file": "/assets/banks/fordbank-de.png",
+    "source": "https://www.google.com/s2/favicons?domain=fordbank.de&sz=128",
+    "bytes": 317,
+    "note": "Favicon cache for official bank domain"
+  },
+  "hanseaticbank.de": {
+    "file": "/assets/banks/hanseaticbank-de.png",
+    "source": "https://www.hanseaticbank.de/assets/hbcw/build/image/favicon_120x120.png",
+    "bytes": 1805
+  },
+  "haspa.de": {
+    "file": "/assets/banks/haspa-de.png",
+    "source": "https://www.haspa.de/content/dam/myif/haspa/work/bilder/icons/apple-touch-icon-180x180px.png",
+    "bytes": 1829
+  },
+  "helaba.de": {
+    "file": "/assets/banks/helaba-de.png",
+    "source": "https://www.helaba.com/wLayout/wGlobal/layout/images/site-icons/apple-touch-icon-152.png",
+    "bytes": 150
+  },
+  "hypovereinsbank.de": {
+    "file": "/assets/banks/hypovereinsbank-de.png",
+    "source": "https://www.hypovereinsbank.de/etc/designs/hypovereinsbank/img/favicon/apple-touch-icon.png",
+    "bytes": 1758
+  },
+  "ing.de": {
+    "file": "/assets/banks/ing-de.ico",
+    "source": "https://cdn.ing.de/ing-cms-ui/156.0.0/assets/favicons/favicon.ico",
+    "bytes": 4286
+  },
+  "kfw.de": {
+    "file": "/assets/banks/kfw-de.png",
+    "source": "https://www.kfw.de/Techn-Medien/favicons/KfW_Logo_180x180px.png",
+    "bytes": 1179
+  },
+  "lbbw.de": {
+    "file": "/assets/banks/lbbw-de.png",
+    "source": "https://www.lbbw.de/res/favicons/apple-touch-icon_4841983_m.png",
+    "bytes": 868
+  },
+  "lbs.de": {
+    "file": "/assets/banks/lbs-de.png",
+    "source": "https://www.lbs.de/apple-touch-icon.png",
+    "bytes": 11268
+  },
+  "mercedes-benz-bank.de": {
+    "file": "/assets/banks/mercedes-benz-bank-de.png",
+    "source": "https://www.google.com/s2/favicons?domain=mercedes-benz-bank.de&sz=128",
+    "bytes": 3545,
+    "note": "Favicon cache for official bank domain"
+  },
+  "n26.com": {
+    "file": "/assets/banks/n26-com.png",
+    "source": "https://n26.com/_build/logo-256x256.png",
+    "bytes": 5318
+  },
+  "nordlb.de": {
+    "file": "/assets/banks/nordlb-de.ico",
+    "source": "https://www.nordlb.de/_assets/b921c5472bb6b0b800542abc239d3f70/Icons/favicon.ico",
+    "bytes": 16958
+  },
+  "norisbank.de": {
+    "file": "/assets/banks/norisbank-de.png",
+    "source": "https://www.norisbank.de/etc/designs/db-eccs-nb/assets/favicon-redesign-norisbank.png",
+    "bytes": 1693
+  },
+  "olb.de": {
+    "file": "/assets/banks/olb-de.png",
+    "source": "https://www.olb.de/assets/olb/apple-touch-icon.png",
+    "bytes": 3622
+  },
+  "openbank.de": {
+    "file": "/assets/banks/openbank-de.png",
+    "source": "https://www.openbank.de/content/dam/openbank/icons/favicons/apple-touch-icon.png",
+    "bytes": 23442
+  },
+  "paypal.com": {
+    "file": "/assets/banks/paypal-com.png",
+    "source": "https://www.paypalobjects.com/marketing/web/icons/monogram/pp64.png",
+    "bytes": 750
+  },
+  "postbank.de": {
+    "file": "/assets/banks/postbank-de.png",
+    "source": "https://www.postbank.de/etc/designs/pb-eccs-pb/icons/pb-favicon-180x180.png",
+    "bytes": 14116
+  },
+  "psd-bank.de": {
+    "file": "/assets/banks/psd-bank-de.png",
+    "source": "https://www.psd-bank.de/wp-content/uploads/2025/01/PSD_Logo.png",
+    "bytes": 4131
+  },
+  "renault-bank-direkt.de": {
+    "file": "/assets/banks/renault-bank-direkt-de.svg",
+    "source": "https://www.renault-bank-direkt.de/images/favicon.svg",
+    "bytes": 994
+  },
+  "revolut.com": {
+    "file": "/assets/banks/revolut-com.png",
+    "source": "https://www.google.com/s2/favicons?domain=revolut.com&sz=128",
+    "bytes": 859,
+    "note": "Favicon cache for official bank domain"
+  },
+  "santander.de": {
+    "file": "/assets/banks/santander-com.png",
+    "source": "https://www.santander.com/content/dam/santander-com/resources/favicon/apple-touch-icon.png",
+    "bytes": 6501
+  },
+  "sbroker.de": {
+    "file": "/assets/banks/sbroker-de.png",
+    "source": "https://www.sbroker.de/favicon/apple-touch-icon.png",
+    "bytes": 2666
+  },
+  "schwaebisch-hall.de": {
+    "file": "/assets/banks/schwaebisch-hall-de.ico",
+    "source": "https://www.schwaebisch-hall.de/favicon.ico",
+    "bytes": 894
+  },
+  "skgbank.de": {
+    "file": "/assets/banks/skgbank-de.png",
+    "source": "https://www.skgbank.de/export/sites/skgbank/_conf/system/img/_icons/apple-touch-icon.png",
+    "bytes": 1414
+  },
+  "sparda.de": {
+    "file": "/assets/banks/sparda-de.png",
+    "source": "https://www.google.com/s2/favicons?domain=sparda.de&sz=128",
+    "bytes": 198,
+    "note": "Favicon cache for official bank domain"
+  },
+  "sparkasse-bremen.de": {
+    "file": "/assets/banks/sparkasse-bremen-de.png",
+    "source": "https://www.sparkasse-bremen.de/content/dam/myif/sk-bremen/work/bilder/icons/apple-touch-icon-180x180px.png",
+    "bytes": 1829
+  },
+  "sparkasse.de": {
+    "file": "/assets/banks/sparkasse-de.png",
+    "source": "https://www.sparkasse.de/apple-touch-icon.png",
+    "bytes": 1542
+  },
+  "stellantis-financial-services.de": {
+    "file": "/assets/banks/stellantis-financial-services-de.ico",
+    "source": "https://www.stellantis-financial-services.de/images/favicon.ico",
+    "bytes": 4286
+  },
+  "swkbank.de": {
+    "file": "/assets/banks/swkbank-de.ico",
+    "source": "https://www.swkbank.de/favicon.ico",
+    "bytes": 2238
+  },
+  "targobank.de": {
+    "file": "/assets/banks/targobank-de.png",
+    "source": "https://www.targobank.de/de/images/favicon/favicon.png",
+    "bytes": 2161
+  },
+  "toyota-bank.de": {
+    "file": "/assets/banks/toyota-bank-de.png",
+    "source": "https://www.google.com/s2/favicons?domain=toyota-bank.de&sz=128",
+    "bytes": 2043,
+    "note": "Favicon cache for official bank domain"
+  },
+  "traderepublic.com": {
+    "file": "/assets/banks/traderepublic-com.ico",
+    "source": "https://traderepublic.com/favicon.ico",
+    "bytes": 285478
+  },
+  "vr.de": {
+    "file": "/assets/banks/vr-de.svg",
+    "source": "https://www.vr.de/content/dam/vr/favicons/favicon.svg",
+    "bytes": 809
+  },
+  "vwfs.de": {
+    "file": "/assets/banks/vwfs-de.png",
+    "source": "https://www.vwfs.de/etc.clientlibs/bluelabel/clientlibs/clientlib-site-bluelabel/resources/favicon/apple-touch-icon.png?v=042",
+    "bytes": 4219
+  },
+  "wuestenrot.de": {
+    "file": "/assets/banks/wuestenrot-de.png",
+    "source": "https://www.wuestenrot.de/media/assets/img/icons/touch-icon-180x180.png",
+    "bytes": 1322
+  },
+  "aareal-bank.com": {
+    "file": "/assets/banks/aareal-bank-com.png",
+    "source": "https://www.aareal-bank.com/_assets/7d7b36aaa5a5d2443e07f326cb28c816/favicon/apple-touch-icon.png",
+    "bytes": 5277
+  },
+  "muenchenerhyp.de": {
+    "file": "/assets/banks/muenchenerhyp-de.png",
+    "source": "https://www.muenchenerhyp.de/sites/default/files/favicon_1.png",
+    "bytes": 2917
+  },
+  "barclays.de": {
+    "source": "https://raw.githubusercontent.com/icongo/bank-logos/main/logos/barclays.svg",
+    "file": "/assets/banks/barclays.svg",
+    "bytes": 6652
+  }
+}

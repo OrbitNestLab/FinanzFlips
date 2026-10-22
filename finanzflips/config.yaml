@@ -1,0 +1,26 @@
+name: FinanzFlips
+version: "2.1.0"
+slug: finanzflips
+description: Private Finanzübersicht und Sparbeträge mit eigener Bankfreigabe
+url: https://github.com/OrbitNestLab/FinanzFlips
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+init: false
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:piggy-bank-outline
+panel_title: FinanzFlips
+panel_admin: true
+homeassistant_api: true
+hassio_api: true
+hassio_role: default
+backup: cold
+options:
+  owner_id: ""
+  notify_service: ""
+schema:
+  owner_id: str
+  notify_service: str
