@@ -50,6 +50,12 @@ function handleImport(message) {
     fs.renameSync(state.tempPath, state.finalPath);
     importState.delete(message.file);
     console.log(`[migration] ${message.file}: vollständig geprüft`);
+    if (message.file === 'master-key') {
+      // Stop inside the same synchronous turn that installs the matching key.
+      // This prevents any timer in the old process from writing with its
+      // in-memory key before Home Assistant starts a fresh process.
+      process.exit(0);
+    }
   }
 }
 
