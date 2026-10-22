@@ -11,7 +11,7 @@ const importTargets = new Map([
   ['bank-public-certificate', 'secrets/enable-banking-public.crt'],
 ]);
 const importState = new Map();
-const importRoot = '/config';
+const importRoot = '/data/finanzflips';
 
 function handleImport(message) {
   const target = importTargets.get(message.file);
