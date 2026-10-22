@@ -1,5 +1,5 @@
 name: FinanzFlips
-version: "2.1.1"
+version: "2.1.2"
 slug: finanzflips
 description: Private Finanzübersicht und Sparbeträge mit eigener Bankfreigabe
 url: https://github.com/OrbitNestLab/FinanzFlips
@@ -11,6 +11,7 @@ boot: auto
 init: false
 ingress: true
 ingress_port: 8099
+stdin: true
 panel_icon: mdi:piggy-bank-outline
 panel_title: FinanzFlips
 panel_admin: true
