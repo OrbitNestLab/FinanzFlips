@@ -1,4 +1,5 @@
 import "./savings-ui.mjs";
+import { browserUUID } from "./browser-crypto.mjs";
 import {
   SCHEMA_VERSION,
   GROUPS,
@@ -338,7 +339,7 @@ function saveState() {
 function audit(label, undo) {
   state.auditLog ||= [];
   state.auditLog.push({
-    id: crypto.randomUUID(),
+    id: browserUUID(),
     at: new Date().toISOString(),
     label,
     undo,
@@ -816,7 +817,7 @@ function saveRecurring(form) {
       snapshot: { ...original, snapshot: undefined },
     };
   } else {
-    const id = original?.id || "manual_" + crypto.randomUUID();
+    const id = original?.id || "manual_" + browserUUID();
     undo = entityUndo(
       "manualRecurring",
       id,
@@ -840,7 +841,7 @@ function saveRecurring(form) {
 function saveAccount(form) {
   const v = formValues(form),
     old = state.accounts.find((x) => x.id === form.dataset.id),
-    id = old?.id || "acct_" + crypto.randomUUID();
+    id = old?.id || "acct_" + browserUUID();
   if (!v.name.trim()) throw Error("Kontoname fehlt.");
   const name = v.name.trim();
   if (state.accounts.some((a) => a.id !== id && a.name === name))
@@ -874,7 +875,7 @@ function saveAccount(form) {
 function saveTransaction(form) {
   const v = formValues(form),
     original = context().txs.find((x) => x.id === form.dataset.id),
-    id = original?.id || "tx_" + crypto.randomUUID(),
+    id = original?.id || "tx_" + browserUUID(),
     collection = original
       ? state.extraTransactions.some((t) => t.id === id)
         ? "extraTransactions"
@@ -910,7 +911,7 @@ function saveTransaction(form) {
       t.subcategory = subcategory;
       t.category = subcategory;
     }
-    const ruleId = crypto.randomUUID();
+    const ruleId = browserUUID();
     state.categoryRules.push({
       id: ruleId,
       merchant: norm(original.merchant),
@@ -981,7 +982,7 @@ function loanFromForm(form) {
     monthlyPayment = number(v.monthlyPayment, "Monatliche Rate", 0.01, 1e9);
   return {
     ...old,
-    id: old?.id || "loan_" + crypto.randomUUID(),
+    id: old?.id || "loan_" + browserUUID(),
     name: v.name.trim() || v.bankName.trim() || "Mein Kredit",
     bankName:
       v.bankName?.trim() ||
@@ -1161,7 +1162,7 @@ function commitImport(form) {
     const cat = classifyCategory(t.category, t.merchant, t.amount);
     return applyCategoryRules({
       ...t,
-      id: "tx_" + crypto.randomUUID(),
+      id: "tx_" + browserUUID(),
       accountId: account.id,
       account: t.account || account.name,
       referenceIban: t.referenceIban || account.iban || "",
@@ -2180,7 +2181,7 @@ document.addEventListener("submit", async (event) => {
           );
         loan.extraPayments ||= [];
         loan.extraPayments.push({
-          id: crypto.randomUUID(),
+          id: browserUUID(),
           amount: number(v.amount, "Sondertilgung", 0.01, 1e9),
           date,
           note: v.note || "",
