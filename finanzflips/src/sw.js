@@ -1,4 +1,4 @@
-const CACHE = "finanzflips-shell-v9";
+const CACHE = "finanzflips-shell-v10";
 const shell = [
   "./",
   "./index.html",
