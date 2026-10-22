@@ -977,6 +977,9 @@ export function nextPayments(items, from = today(), days = 35) {
   for (const item of items.filter((x) => x.status === "active")) {
     let date = item.nextDate || item.lastDate;
     if (!isoDate(date)) continue;
+    const firstAmount = item.reviewed
+      ? item.amount
+      : (item.nextAmount ?? item.amount);
     let guard = 0;
     // A late observed payment is shown as overdue; only future cycles are advanced.
     if (
@@ -988,11 +991,11 @@ export function nextPayments(items, from = today(), days = 35) {
       if (
         dayDiff(date, from) >= -7 &&
         (!item.endDate || date <= item.endDate) &&
-        (guard !== 1 || (item.nextAmount ?? item.amount) > 0)
+        (guard !== 1 || firstAmount > 0)
       )
         out.push({
           ...item,
-          amount: guard === 1 ? (item.nextAmount ?? item.amount) : item.amount,
+          amount: guard === 1 ? firstAmount : item.amount,
           paymentDate: date,
         });
       date = advanceDate(date, item.frequency, item.dueDay);
