@@ -1,7 +1,6 @@
 import {
   allTransactions,
   detectRecurring,
-  isTransfer,
   norm,
   sum,
   today,
@@ -9,18 +8,10 @@ import {
   advanceDate,
 } from "./model.mjs";
 const day = (d) => Number(d.slice(8, 10));
-const median = (xs) => {
-  const a = [...xs].sort((a, b) => a - b);
-  return a.length ? a[Math.floor(a.length / 2)] : 0;
-};
 const daysBetween = (a, b) =>
   Math.round(
     (Date.parse(a + "T12:00:00Z") - Date.parse(b + "T12:00:00Z")) / 86400000,
   );
-const shiftDays = (d, n) =>
-  new Date(Date.parse(d + "T12:00:00Z") + n * 86400000)
-    .toISOString()
-    .slice(0, 10);
 export function nextTenth(asOf = today()) {
   return day(asOf) < 10 ? asOf.slice(0, 7) + "-10" : addMonths(asOf, 1, 10);
 }
@@ -34,96 +25,6 @@ export function forecastAccount(state, items = detectRecurring(state)) {
   );
   const ids = [...new Set(salaries.map((r) => r.accountId))];
   return ids.length === 1 ? state.accounts.find((a) => a.id === ids[0]) : null;
-}
-function salaryParts(item, txs, asOf) {
-  if (!item.splitSalary || item.frequency !== "monthly") return null;
-  const ids = new Set(item.evidenceIds || []);
-  const rows = txs.filter(
-    (t) =>
-      ids.has(t.id) &&
-      t.amount > 0 &&
-      t.bookingDate.slice(0, 7) < asOf.slice(0, 7),
-  );
-  const months = [...new Set(rows.map((t) => t.bookingDate.slice(0, 7)))]
-    .sort()
-    .slice(-3);
-  const recent = rows.filter((t) => months.includes(t.bookingDate.slice(0, 7)));
-  const groups = [
-    recent.filter((t) => day(t.bookingDate) <= 15),
-    recent.filter((t) => day(t.bookingDate) > 15),
-  ];
-  if (
-    months.length < 2 ||
-    groups.some(
-      (g) => new Set(g.map((t) => t.bookingDate.slice(0, 7))).size < 2,
-    )
-  )
-    return null;
-  const parts = groups.map((g) => ({
-    dueDay: median(g.map((t) => day(t.bookingDate))),
-    amount: median(
-      months.map((m) =>
-        sum(g.filter((t) => t.bookingDate.startsWith(m)).map((t) => t.amount)),
-      ),
-    ),
-  }));
-  const total = sum(parts.map((p) => p.amount));
-  if (!total) return null;
-  const first = Math.round((parts[0].amount / total) * item.amount * 100) / 100;
-  return [
-    { ...parts[0], amount: first },
-    { ...parts[1], amount: sum([item.amount, -first]) },
-  ];
-}
-function monthlyTransfers(txs, state, accountId, asOf) {
-  const buckets = new Map();
-  for (const t of txs.filter(
-    (t) =>
-      t.accountId === accountId &&
-      !t.splitExcluded &&
-      isTransfer(t, state) &&
-      t.bookingDate <= asOf &&
-      daysBetween(asOf, t.bookingDate) <= 120,
-  )) {
-    const key = [
-      norm(t.merchant),
-      t.counterpartyIban || "",
-      Math.sign(t.amount),
-    ].join("|");
-    if (!buckets.has(key)) buckets.set(key, []);
-    buckets.get(key).push(t);
-  }
-  const out = [];
-  for (const [key, rows] of buckets) {
-    const months = [
-      ...new Set(rows.map((t) => t.bookingDate.slice(0, 7))),
-    ].sort();
-    if (months.length < 2 || rows.length > months.length + 1) continue;
-    const amounts = rows.map((t) => Math.abs(t.amount)),
-      amount = median(amounts);
-    if (amounts.some((v) => Math.abs(v - amount) > Math.max(1, amount * 0.08)))
-      continue;
-    const last = rows
-      .map((t) => t.bookingDate)
-      .sort()
-      .at(-1);
-    if (daysBetween(asOf, last) > 45) continue;
-    out.push({
-      id: "forecast-transfer-" + key,
-      name: rows[0].merchant,
-      accountId,
-      amount,
-      direction: rows[0].amount < 0 ? "expense" : "income",
-      frequency: "monthly",
-      dueDay: median(rows.map((t) => day(t.bookingDate))),
-      nextDate: addMonths(last, 1, median(rows.map((t) => day(t.bookingDate)))),
-      status: "active",
-      evidenceIds: rows.map((t) => t.id),
-      transfer: true,
-      reviewed: false,
-    });
-  }
-  return out;
 }
 export function accountForecast(
   state,
@@ -158,81 +59,59 @@ export function accountForecast(
       "Der Kontostand ist älter als zwei Tage. Vor der Planung aktualisieren.",
     );
   const txs = allTransactions(state).filter((t) => !t.splitExcluded),
-    relevant = items.filter(
+    accountItems = items.filter(
       (r) => r.status === "active" && r.accountId === account.id,
+    ),
+    relevant = accountItems.filter((r) => r.reviewed);
+  const omitted = accountItems.length - relevant.length;
+  if (omitted)
+    warnings.push(
+      `${omitted} unbestätigte ${omitted === 1 ? "Zahlung wird" : "Zahlungen werden"} nicht eingerechnet.`,
     );
-  const transfers = monthlyTransfers(txs, state, account.id, asOf).filter(
-    (r) =>
-      !relevant.some((x) =>
-        (x.evidenceIds || []).some((id) => r.evidenceIds.includes(id)),
-      ),
-  );
   const events = [];
-  for (const item of [...relevant, ...transfers]) {
-    const parts = salaryParts(item, txs, asOf) || [
-      {
-        dueDay: item.dueDay || day(item.nextDate || asOf),
-        amount: item.amount,
-      },
-    ];
-    for (let pi = 0; pi < parts.length; pi++) {
-      const part = parts[pi];
-      let date = item.nextDate;
-      if (parts.length > 1) date = addMonths(asOf, 0, part.dueDay);
-      if (!date) {
-        warnings.push("Bei mindestens einem Vertrag fehlt ein Zahlungstermin.");
+  for (const item of relevant) {
+    let date = item.nextDate;
+    if (!date) {
+      warnings.push("Bei mindestens einem bestätigten Eintrag fehlt ein Zahlungstermin.");
+      continue;
+    }
+    const amount = Number(item.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      warnings.push("Bei mindestens einem bestätigten Eintrag fehlt ein gültiger Betrag.");
+      continue;
+    }
+    const advance = (d) => advanceDate(d, item.frequency, item.dueDay || day(d));
+    let guard = 0;
+    while (date <= target && guard++ < 100) {
+      if (date < asOf) {
+        date = advance(date);
         continue;
       }
-      const advance = (d) => advanceDate(d, item.frequency, part.dueDay);
-      let guard = 0;
-      while (date <= target && guard++ < 100) {
-        if (date < shiftDays(asOf, -7)) {
-          date = advance(date);
-          continue;
-        }
-        if (item.endDate && date > item.endDate) break;
-        let amount = part.amount;
-        if (
-          parts.length === 1 &&
-          date === item.nextDate &&
-          item.nextAmount != null
-        )
-          amount = item.nextAmount;
-        const ids = new Set(item.evidenceIds || []);
-        const paid = txs.filter(
+      if (item.endDate && date > item.endDate) break;
+      const evidence = new Set(item.evidenceIds || []),
+        alreadyBooked = txs.some(
           (t) =>
             t.accountId === account.id &&
-            ids.has(t.id) &&
+            evidence.has(t.id) &&
             t.bookingDate <= asOf &&
             Math.sign(t.amount) === (item.direction === "income" ? 1 : -1) &&
             Math.abs(daysBetween(t.bookingDate, date)) <= 5,
         );
-        // For the residual current-month salary nextAmount already excludes advances.
-        if (
-          !(
-            parts.length === 1 &&
-            item.splitSalary &&
-            item.nextAmount !== item.amount
-          )
-        )
-          amount = Math.max(
-            0,
-            sum([amount, -Math.abs(sum(paid.map((t) => t.amount)))]),
-          );
-        if (amount > 0 && date >= balanceDate) {
-          events.push({
-            id: item.id + "-" + date + "-" + pi,
-            recurringId: item.id,
-            name: item.name,
-            date,
-            amount: item.direction === "income" ? amount : -amount,
-            kind: item.transfer ? "transfer" : item.kind || "contract",
-            reviewed: !!item.reviewed,
-            overdue: date < asOf,
-          });
-        }
+      if (alreadyBooked) {
         date = advance(date);
+        continue;
       }
+      events.push({
+        id: item.id + "-" + date,
+        recurringId: item.id,
+        name: item.name,
+        date,
+        amount: item.direction === "income" ? amount : -amount,
+        kind: item.kind || "contract",
+        reviewed: true,
+        overdue: false,
+      });
+      date = advance(date);
     }
   }
   // This forecast intentionally contains no inferred discretionary spending.
@@ -244,15 +123,7 @@ export function accountForecast(
     expenses = Math.abs(
       sum(events.filter((x) => x.amount < 0).map((x) => x.amount)),
     );
-  if (events.some((x) => !x.reviewed))
-    warnings.push("Enthält automatisch geschätzte Termine und Beträge.");
-  if (events.some((x) => x.overdue))
-    warnings.push(
-      "Überfällige, noch nicht zugeordnete Zahlungen sind berücksichtigt.",
-    );
-  warnings.push(
-    "Unbekannte Einmalzahlungen, vorgemerkte Kartenumsätze und Terminverschiebungen können abweichen.",
-  );
+  warnings.push("Es zählen nur bestätigte Einträge mit dem in Einnahmen oder Fixkosten gespeicherten Datum und Betrag.");
   return {
     ...base,
     balance: account.balance,
