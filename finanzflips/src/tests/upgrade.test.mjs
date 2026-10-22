@@ -237,7 +237,7 @@ test("forecast needs dated balance; paid dates and ended contracts do not get su
   });
   assert.equal(f.projected, 1000);
 });
-test("split salaries allocate historical advances and residuals without counting a full month twice", () => {
+test("forecast uses the confirmed income amount and date without inventing salary parts", () => {
   const s = forecastState();
   s.extraTransactions = ["08", "09"].flatMap((m) => [
     tx(m + "a", { bookingDate: `2026-${m}-05`, amount: 800 }),
@@ -254,10 +254,17 @@ test("split salaries allocate historical advances and residuals without counting
   });
   const f = accountForecast(s, { asOf: "2026-10-21", items: [item] });
   assert.equal(f.income, 2000);
-  assert.deepEqual(
-    f.events.map((x) => x.date),
-    ["2026-10-30", "2026-11-05"],
-  );
+  assert.deepEqual(f.events.map((x) => x.date), ["2026-10-30"]);
+  assert.deepEqual(f.events.map((x) => x.amount), [2000]);
+});
+test("unconfirmed detected payments never affect the forecast", () => {
+  const f = accountForecast(forecastState(), {
+    asOf: "2026-10-21",
+    items: [rec("guess", { reviewed: false, amount: 999 })],
+  });
+  assert.equal(f.expenses, 0);
+  assert.equal(f.projected, 1000);
+  assert.match(f.warnings.join(" "), /unbestätigte Zahlung wird nicht eingerechnet/);
 });
 test("weekly forecast advances weeks rather than fractional months", () => {
   const f = accountForecast(forecastState(), {
