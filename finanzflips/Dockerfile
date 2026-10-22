@@ -6,5 +6,5 @@ RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY src/ ./
 RUN python3 -m venv work/fints-venv && work/fints-venv/bin/pip install --no-cache-dir fints==5.0.1
 COPY start.mjs /app/start.mjs
-ENV PORT=8099 FINANZFLIPS_DATA_DIR=/config FINANZFLIPS_HA_INGRESS=1 TZ=Europe/Berlin
+ENV PORT=8099 FINANZFLIPS_DATA_DIR=/data/finanzflips FINANZFLIPS_HA_INGRESS=1 TZ=Europe/Berlin
 CMD ["node", "start.mjs"]
