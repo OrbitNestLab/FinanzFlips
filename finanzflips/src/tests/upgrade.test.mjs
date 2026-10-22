@@ -166,7 +166,7 @@ test("next 10 rolls across year and uses next month on the 10th itself", () => {
   assert.equal(nextTenth("2026-10-09"), "2026-10-10");
   assert.equal(nextTenth("2026-10-10"), "2026-11-10");
 });
-test("forecast uses only selected account, exact due dates, expenses, income and daily allowance", () => {
+test("forecast uses only selected account, exact due dates, expenses and income", () => {
   const s = forecastState();
   s.settings.forecastVariableDaily = 10;
   const f = accountForecast(s, {
@@ -188,9 +188,33 @@ test("forecast uses only selected account, exact due dates, expenses, income and
       }),
     ],
   });
-  assert.equal(f.projected, 2300);
+  assert.equal(f.projected, 2500);
   assert.equal(f.target, "2026-11-10");
   assert.equal(f.events.length, 2);
+});
+test("forecast never subtracts inferred or configured variable spending", () => {
+  const s = forecastState();
+  s.settings.forecastVariableDaily = 999;
+  s.extraTransactions = [
+    tx("shopping", { bookingDate: "2026-10-20", amount: -900 }),
+  ];
+  const f = accountForecast(s, { asOf: "2026-10-21", items: [] });
+  assert.equal(f.daily, 0);
+  assert.equal(f.variable, 0);
+  assert.equal(f.projected, 1000);
+});
+test("forecast recalculates immediately when a contract changes", () => {
+  const s = forecastState();
+  const first = accountForecast(s, {
+    asOf: "2026-10-21",
+    items: [rec("rent", { amount: 500 })],
+  });
+  const changed = accountForecast(s, {
+    asOf: "2026-10-21",
+    items: [rec("rent", { amount: 650 })],
+  });
+  assert.equal(first.projected, 500);
+  assert.equal(changed.projected, 350);
 });
 test("forecast needs dated balance; paid dates and ended contracts do not get subtracted again", () => {
   const s = forecastState();
