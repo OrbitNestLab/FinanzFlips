@@ -2269,10 +2269,7 @@ document.addEventListener("submit", async (event) => {
         state.settings = {
           ...state.settings,
           forecastAccountId: v.accountId,
-          forecastVariableDaily:
-            v.variableDaily.trim() === ""
-              ? null
-              : number(v.variableDaily, "Tagesbudget", 0, 100000),
+          forecastVariableDaily: null,
         };
         closeDialog();
         audit("Kontoprognose angepasst", {
