@@ -1,5 +1,9 @@
 # Änderungen
 
+## 2.1.1
+
+- Privaten App-Konfigurationsordner für gesicherte Datenübernahme und HA-Backups eingebunden
+
 ## 2.1.0
 
 - Neue Ansicht „Automatisches Sparen“
