@@ -53,6 +53,18 @@ function handleImport(message) {
     if (state.plaintext && message.file !== 'bank-public-certificate') {
       importVault.write(state.finalPath, payload.toString('utf8'));
       fs.unlinkSync(state.tempPath);
+      if (message.file === 'data') {
+        const checked = JSON.parse(importVault.read(state.finalPath));
+        fs.writeFileSync(
+          path.join(importRoot, '.migration-report.json'),
+          JSON.stringify({
+            appAccounts: checked.appState?.accounts?.length || 0,
+            bankAccounts: checked.accounts?.length || 0,
+            sessions: checked.sessions?.length || 0,
+          }),
+          { mode: 0o600 },
+        );
+      }
     } else {
       fs.renameSync(state.tempPath, state.finalPath);
     }
@@ -83,11 +95,18 @@ process.env.FINANZFLIPS_HA_OWNER_ID=options.owner_id;
 process.env.FINANZFLIPS_NOTIFY_SERVICE=options.notify_service||'';
 try{const r=await fetch('http://supervisor/addons/self/info',{headers:{Authorization:'Bearer '+process.env.SUPERVISOR_TOKEN},signal:AbortSignal.timeout(10000)});const {data}=await r.json();if(data?.slug)process.env.FINANZFLIPS_HA_PANEL='/hassio/ingress/'+data.slug;}catch{}
 try {
+  const reportPath = path.join(importRoot, '.migration-report.json');
+  if (fs.existsSync(reportPath)) {
+    const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+    console.log(
+      `[migration-report] app-konten=${report.appAccounts || 0} bank-konten=${report.bankAccounts || 0} sitzungen=${report.sessions || 0}`,
+    );
+  }
   const stored = JSON.parse(importVault.read(path.join(importRoot, '.finanzflips-data.json')));
   console.log(
     `[storage] app-konten=${stored.appState?.accounts?.length || 0} bank-konten=${stored.accounts?.length || 0} sitzungen=${stored.sessions?.length || 0}`,
   );
 } catch (error) {
-  console.error(`[storage] nicht lesbar: ${error.name}`);
+  console.error(`[storage] nicht lesbar: ${error.name}: ${error.message}`);
 }
 await import('./server.mjs');
