@@ -1,4 +1,4 @@
-const CACHE = "finanzflips-shell-v7";
+const CACHE = "finanzflips-shell-v8";
 const shell = [
   "./",
   "./index.html",
@@ -18,6 +18,7 @@ const shell = [
   "./manifest.webmanifest",
   "./icon.svg",
   "./savings-ui.mjs",
+  "./browser-crypto.mjs",
 ];
 const base = new URL("./", self.location.href);
 const urls = shell.map((p) => new URL(p, base).href);
