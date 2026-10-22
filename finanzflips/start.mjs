@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import readline from 'node:readline';
+import { localVault } from './local-vault.mjs';
 
 const importTargets = new Map([
   ['master-key', '.finanzflips-master.key'],
@@ -12,6 +13,7 @@ const importTargets = new Map([
 ]);
 const importState = new Map();
 const importRoot = '/data/finanzflips';
+const importVault = localVault(importRoot);
 
 function handleImport(message) {
   const target = importTargets.get(message.file);
@@ -27,6 +29,7 @@ function handleImport(message) {
       size: Number(message.size),
       sha256: String(message.sha256 || ''),
       received: 0,
+      plaintext: message.plaintext === true,
     });
     console.log(`[migration] ${message.file}: vorbereitet`);
     return;
@@ -47,7 +50,12 @@ function handleImport(message) {
     if (payload.length !== state.size || digest !== state.sha256)
       throw Error('Größe oder Prüfsumme stimmt nicht.');
     fs.chmodSync(state.tempPath, 0o600);
-    fs.renameSync(state.tempPath, state.finalPath);
+    if (state.plaintext && message.file !== 'bank-public-certificate') {
+      importVault.write(state.finalPath, payload.toString('utf8'));
+      fs.unlinkSync(state.tempPath);
+    } else {
+      fs.renameSync(state.tempPath, state.finalPath);
+    }
     importState.delete(message.file);
     console.log(`[migration] ${message.file}: vollständig geprüft`);
     if (message.file === 'master-key') {
@@ -75,9 +83,7 @@ process.env.FINANZFLIPS_HA_OWNER_ID=options.owner_id;
 process.env.FINANZFLIPS_NOTIFY_SERVICE=options.notify_service||'';
 try{const r=await fetch('http://supervisor/addons/self/info',{headers:{Authorization:'Bearer '+process.env.SUPERVISOR_TOKEN},signal:AbortSignal.timeout(10000)});const {data}=await r.json();if(data?.slug)process.env.FINANZFLIPS_HA_PANEL='/hassio/ingress/'+data.slug;}catch{}
 try {
-  const { localVault } = await import('./local-vault.mjs');
-  const vault = localVault(importRoot);
-  const stored = JSON.parse(vault.read(path.join(importRoot, '.finanzflips-data.json')));
+  const stored = JSON.parse(importVault.read(path.join(importRoot, '.finanzflips-data.json')));
   console.log(
     `[storage] app-konten=${stored.appState?.accounts?.length || 0} bank-konten=${stored.accounts?.length || 0} sitzungen=${stored.sessions?.length || 0}`,
   );
