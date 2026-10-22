@@ -335,7 +335,7 @@ test("explicit ended contracts no longer contribute and final date caps payment 
   );
 });
 
-test("manual monthly salary correction keeps remaining instalment separate from full monthly plan", () => {
+test("confirmed salary calendar uses the saved plan amount without a calculated residual", () => {
   const s = fixture([
     tx("Arbeitgeber", "2026-08-15", 1200, "Lohn / Gehalt"),
     tx("Arbeitgeber", "2026-08-30", 1300, "Lohn / Gehalt"),
@@ -352,6 +352,7 @@ test("manual monthly salary correction keeps remaining instalment separate from 
   const updated = detectRecurring(s, "2026-10-21")[0];
   assert.equal(updated.amount, 2600);
   assert.equal(updated.nextAmount, 1400);
+  assert.equal(nextPayments([updated], "2026-10-21", 35)[0].amount, 2600);
 });
 test("delayed quarterly contributions stay quarterly with corroborated export metadata", () => {
   const s = fixture(
