@@ -6,6 +6,8 @@ const escape = (v) =>
         c
       ],
   );
+import { browserUUID } from "./browser-crypto.mjs";
+
 const labels = {
   planned: "Berechnung geplant",
   fetching: "Bankabruf läuft",
@@ -182,7 +184,7 @@ class SavingsPanel extends HTMLElement {
       if (action === "run") {
         try {
           const result = await this.api("run", {
-            requestId: crypto.randomUUID(),
+            requestId: browserUUID(),
           });
           this.selected = result.id;
         } catch (e) {
@@ -194,7 +196,7 @@ class SavingsPanel extends HTMLElement {
           ) {
             const previous = d.operations.find((o) => o.status === "confirmed");
             const result = await this.api("run", {
-              requestId: crypto.randomUUID(),
+              requestId: browserUUID(),
               confirmNew: true,
               previousId: previous.id,
             });
