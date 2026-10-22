@@ -736,6 +736,7 @@ const publicFiles = new Set([
   "bank-ui.mjs",
   "fints-ui.mjs",
   "savings-ui.mjs",
+  "browser-crypto.mjs",
 ]);
 const server = http.createServer(async (req, res) => {
   let url;
