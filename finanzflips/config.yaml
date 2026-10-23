@@ -12,9 +12,9 @@ init: false
 ingress: true
 ingress_port: 8099
 ports:
-  8099/tcp: 8789
+  8100/tcp: 8789
 ports_description:
-  8099/tcp: Geschützter Import aus dem macOS-Teilen-Menü
+  8100/tcp: Geschützter Import aus dem macOS-Teilen-Menü
 stdin: true
 panel_icon: mdi:piggy-bank-outline
 panel_title: FinanzFlips
