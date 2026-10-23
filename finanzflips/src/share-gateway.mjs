@@ -42,6 +42,17 @@ async function readJson(req) {
   }
 }
 
+async function readBuffer(req) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > 20_000_000) throw error("Die Exportdatei ist zu groß.", 413);
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
 function sameToken(req, token) {
   const actual = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
   return actual.length === token.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(token));
@@ -111,15 +122,20 @@ export function startShareGateway({ dataDir = "/data/finanzflips", port = 8100 }
         throw error("Nicht gefunden.", 404);
       if (!sameToken(req, token)) throw error("Freigabeschlüssel ungültig.", 401);
 
-      const input = await readJson(req);
-      const filename = String(input.filename || "").slice(0, 240);
-      const encoded = String(input.file || "");
+      const isJson = String(req.headers["content-type"] || "").includes("application/json");
+      const input = isJson ? await readJson(req) : null;
+      const filename = String(
+        isJson
+          ? input.filename || ""
+          : Buffer.from(String(req.headers["x-finanzflips-filename"] || ""), "base64").toString("utf8"),
+      ).slice(0, 240);
       if (!/\.(?:xlsx|csv)$/i.test(filename))
         throw error("Bitte eine XLSX- oder CSV-Datei aus Finanzguru teilen.");
-      if (!/^[A-Za-z0-9+/=]+$/.test(encoded) || encoded.length > 28_000_000)
+      const file = isJson
+        ? Buffer.from(String(input.file || ""), "base64")
+        : await readBuffer(req);
+      if (!file.length || file.length > 20_000_000)
         throw error("Die Exportdatei ist ungültig oder zu groß.");
-
-      const file = Buffer.from(encoded, "base64");
       const parsed = /\.xlsx$/i.test(filename)
         ? parseXLSX(file)
         : parseCSV(file.toString("utf8").replace(/^\uFEFF/, ""));
