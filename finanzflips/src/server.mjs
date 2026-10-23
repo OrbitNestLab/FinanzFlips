@@ -9,7 +9,16 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { normalizeBankAccount, fetchTransactionPages } from "./banking.mjs";
 import { parseXLSX } from "./xlsx.mjs";
-import { today, isoDate, addMonths, GROUPS } from "./model.mjs";
+import {
+  today,
+  isoDate,
+  addMonths,
+  GROUPS,
+  parseCSV,
+  classifyCategory,
+  mergeTransactions,
+  markSplitOriginals,
+} from "./model.mjs";
 import { scrubReviewText } from "./agent.mjs";
 import { createBankCallback } from "./bank-callback.mjs";
 import { mergeBankResult } from "./bank-sync.mjs";
@@ -168,6 +177,146 @@ function checkOrigin(req) {
     if (!allowed.has(origin))
       throw fail("Anfrage einer anderen Website abgelehnt.", 403);
   }
+}
+function validShareToken(req) {
+  const expected = String(config.SHARE_IMPORT_TOKEN || "");
+  const actual = String(req.headers.authorization || "").replace(
+    /^Bearer\s+/i,
+    "",
+  );
+  if (expected.length < 24 || actual.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+}
+function importAccount(state, transaction) {
+  const iban = String(transaction.referenceIban || "")
+    .replace(/\s/g, "")
+    .toUpperCase();
+  return (
+    state.accounts.find((account) => transaction.accountId === account.id) ||
+    state.accounts.find(
+      (account) =>
+        iban &&
+        String(account.iban || "")
+          .replace(/\s/g, "")
+          .toUpperCase() === iban,
+    ) ||
+    state.accounts.find(
+      (account) =>
+        String(account.name || "")
+          .trim()
+          .toLocaleLowerCase("de-DE") ===
+        String(transaction.account || "")
+          .trim()
+          .toLocaleLowerCase("de-DE"),
+    )
+  );
+}
+function applyStoredCategoryRule(state, transaction) {
+  const merchant = String(transaction.merchant || "")
+    .trim()
+    .toLocaleLowerCase("de-DE");
+  for (const rule of state.categoryRules || [])
+    if (
+      merchant === rule.merchant &&
+      transaction.accountId === rule.accountId &&
+      Math.sign(transaction.amount) === rule.direction &&
+      (transaction.category === rule.fromCategory ||
+        transaction.group === "Sonstiges")
+    ) {
+      transaction.group = rule.group;
+      transaction.subcategory = rule.subcategory;
+      transaction.category = rule.subcategory;
+    }
+  return transaction;
+}
+async function sharedImport(req) {
+  if (!validShareToken(req)) throw fail("Freigabeschlüssel ungültig.", 401);
+  const input = await bodyJson(req),
+    filename = String(input.filename || "").slice(0, 240),
+    encoded = String(input.file || "");
+  if (!/\.(?:xlsx|csv)$/i.test(filename))
+    throw fail("Bitte eine XLSX- oder CSV-Datei aus Finanzguru teilen.");
+  if (!/^[A-Za-z0-9+/=]+$/.test(encoded) || encoded.length > 28e6)
+    throw fail("Die Exportdatei ist ungültig oder zu groß.");
+  const file = Buffer.from(encoded, "base64");
+  let parsed;
+  try {
+    parsed = /\.xlsx$/i.test(filename)
+      ? parseXLSX(file)
+      : parseCSV(file.toString("utf8").replace(/^\uFEFF/, ""));
+  } catch (error) {
+    throw fail(error.message || "Die Exportdatei konnte nicht gelesen werden.");
+  }
+  if (!parsed.transactions.length)
+    throw fail("Keine gültigen Buchungen in der Datei gefunden.");
+  const data = loadData(),
+    state = data.appState;
+  validateState(state);
+  const missing = new Set(),
+    prepared = [];
+  for (const transaction of parsed.transactions) {
+    const account = importAccount(state, transaction);
+    if (!account) {
+      missing.add(
+        transaction.account || transaction.referenceIban || "Unbekannt",
+      );
+      continue;
+    }
+    const category = classifyCategory(
+      transaction.category,
+      transaction.merchant,
+      transaction.amount,
+    );
+    prepared.push(
+      applyStoredCategoryRule(state, {
+        ...transaction,
+        id: "tx_" + crypto.randomUUID(),
+        accountId: account.id,
+        account: transaction.account || account.name,
+        referenceIban: transaction.referenceIban || account.iban || "",
+        ...category,
+        source: "share-import",
+        importedAt: new Date().toISOString(),
+      }),
+    );
+  }
+  if (missing.size)
+    throw fail(
+      "Diese Konten müssen zuerst einmal in FinanzFlips zugeordnet werden: " +
+        [...missing].join(", "),
+      422,
+    );
+  const allExisting = [
+      ...(state.extraTransactions || []),
+      ...(state.transactions || []),
+    ],
+    merged = mergeTransactions(allExisting, prepared),
+    addedRows = merged.transactions.slice(allExisting.length);
+  backupState(state, "before-share-import");
+  state.extraTransactions.push(...addedRows);
+  markSplitOriginals([
+    ...(state.extraTransactions || []),
+    ...(state.transactions || []),
+  ]);
+  state.lastImportAt = new Date().toISOString();
+  state.auditLog ||= [];
+  state.auditLog.unshift({
+    id: "audit_" + crypto.randomUUID(),
+    at: state.lastImportAt,
+    label: `${addedRows.length} Buchungen über Teilen importiert`,
+  });
+  data.appStateUpdatedAt = new Date(
+    Math.max(Date.now(), Date.parse(data.appStateUpdatedAt || 0) + 1 || 0),
+  ).toISOString();
+  saveData(data);
+  return {
+    imported: true,
+    filename,
+    added: addedRows.length,
+    duplicates: merged.duplicates,
+    invalidRows: parsed.errors?.length || 0,
+    message: `${addedRows.length} neue Buchungen · ${merged.duplicates} bereits vorhandene übersprungen.`,
+  };
 }
 async function bodyJson(req) {
   let bytes = 0;
@@ -741,8 +890,10 @@ const publicFiles = new Set([
 const server = http.createServer(async (req, res) => {
   let url;
   try {
-    if (haMode) validateIngress(req, config.FINANZFLIPS_HA_OWNER_ID);
     url = new URL(req.url, "http://" + (req.headers.host || "localhost"));
+    if (req.method === "POST" && url.pathname === "/api/share-import")
+      return send(res, 200, await sharedImport(req));
+    if (haMode) validateIngress(req, config.FINANZFLIPS_HA_OWNER_ID);
     const allowed = new Set([
       "127.0.0.1",
       "localhost",
