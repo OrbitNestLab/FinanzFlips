@@ -1,4 +1,4 @@
-import {localVault} from "../local-vault.mjs";
+import { localVault } from "../local-vault.mjs";
 import test, { before, after } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -29,6 +29,7 @@ async function start() {
       OPENAI_API_KEY: "",
       ENABLE_BANKING_APP_ID: "",
       APP_BASE_URL: "",
+      SHARE_IMPORT_TOKEN: "test-share-token-1234567890abcdef",
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -67,6 +68,34 @@ test("fresh server has no fictitious finances; first versioned save succeeds", a
   assert.equal(r.status, 200);
   revision = r.data.updatedAt;
   assert.deepEqual((await get()).state, state);
+});
+test("protected share import adds only new CSV rows and skips repeats", async () => {
+  const file = Buffer.from(
+    "Datum;Empfänger;Betrag;Konto;Kategorie\n23.10.2026;Neuer Einkauf;-12,34;Testkonto;Shopping",
+  ).toString("base64");
+  const send = (token) =>
+    fetch(base + "/api/share-import", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({ filename: "Finanzguru.csv", file }),
+    });
+  assert.equal((await send("wrong-token")).status, 401);
+  const first = await send("test-share-token-1234567890abcdef"),
+    firstResult = await first.json();
+  assert.equal(first.status, 200);
+  assert.equal(firstResult.added, 1);
+  assert.equal(firstResult.duplicates, 0);
+  const second = await send("test-share-token-1234567890abcdef"),
+    secondResult = await second.json();
+  assert.equal(second.status, 200);
+  assert.equal(secondResult.added, 0);
+  assert.equal(secondResult.duplicates, 1);
+  const current = await get();
+  state = current.state;
+  revision = current.updatedAt;
 });
 test("stale revision and legacy client cannot overwrite shared finances", async () => {
   assert.equal((await put({ ...state, accounts: [] }, "stale")).status, 409);
