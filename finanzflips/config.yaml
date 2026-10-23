@@ -1,5 +1,5 @@
 name: FinanzFlips
-version: "2.1.11"
+version: "2.2.0"
 slug: finanzflips
 description: Private Finanzübersicht und Sparbeträge mit eigener Bankfreigabe
 url: https://github.com/OrbitNestLab/FinanzFlips
@@ -11,6 +11,10 @@ boot: auto
 init: false
 ingress: true
 ingress_port: 8099
+ports:
+  8099/tcp: 8789
+ports_description:
+  8099/tcp: Geschützter Import aus dem macOS-Teilen-Menü
 stdin: true
 panel_icon: mdi:piggy-bank-outline
 panel_title: FinanzFlips
@@ -25,6 +29,8 @@ map:
 options:
   owner_id: ""
   notify_service: ""
+  share_import_token: ""
 schema:
   owner_id: str
   notify_service: str
+  share_import_token: password
