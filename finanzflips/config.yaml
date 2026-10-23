@@ -29,8 +29,6 @@ map:
 options:
   owner_id: ""
   notify_service: ""
-  share_import_token: ""
 schema:
   owner_id: str
   notify_service: str
-  share_import_token: password
