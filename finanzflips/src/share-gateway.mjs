@@ -76,6 +76,8 @@ function applyRule(state, transaction) {
 export function startShareGateway({ dataDir = "/data/finanzflips", port = 8100 } = {}) {
   const vault = localVault(dataDir);
   const tokenPath = path.join(dataDir, ".finanzflips-share-token");
+  const pairedPath = path.join(dataDir, ".finanzflips-share-paired");
+  const pairingDeadline = Date.now() + 15 * 60 * 1000;
   let token;
   if (fs.existsSync(tokenPath)) token = vault.read(tokenPath).trim();
   if (!/^[a-f0-9]{64}$/.test(token || "")) {
@@ -91,6 +93,20 @@ export function startShareGateway({ dataDir = "/data/finanzflips", port = 8100 }
   const server = http.createServer(async (req, res) => {
     try {
       const url = new URL(req.url, "http://localhost");
+      if (req.method === "POST" && url.pathname === "/api/share-import/pair") {
+        const address = String(req.socket.remoteAddress || "");
+        const privateNetwork = /^(?:::ffff:)?(?:127\.|10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)|^::1$/.test(address);
+        if (!privateNetwork) throw error("Kopplung ist nur im Heimnetz möglich.", 403);
+        if (fs.existsSync(pairedPath)) throw error("Dieser Importdienst ist bereits gekoppelt.", 409);
+        if (Date.now() > pairingDeadline) throw error("Das Kopplungsfenster ist abgelaufen. FinanzFlips bitte neu starten.", 410);
+        const input = await readJson(req);
+        const requestedToken = String(input.token || "").toLowerCase();
+        if (!/^[a-f0-9]{64}$/.test(requestedToken)) throw error("Der Kopplungsschlüssel ist ungültig.");
+        token = requestedToken;
+        vault.write(tokenPath, token);
+        vault.write(pairedPath, new Date().toISOString());
+        return send(res, 200, { paired: true, message: "Dieser Mac ist jetzt mit FinanzFlips gekoppelt." });
+      }
       if (req.method !== "POST" || url.pathname !== "/api/share-import")
         throw error("Nicht gefunden.", 404);
       if (!sameToken(req, token)) throw error("Freigabeschlüssel ungültig.", 401);
